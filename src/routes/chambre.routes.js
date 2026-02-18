@@ -60,6 +60,12 @@ router.put("/:id", (req, res) => {
   const index = chambres.findIndex((c) => c._id === req.params.id);
   if (index === -1) return res.status(404).json({ message: "Chambre introuvable" });
 
+
+   // Protection: si le body est vide, on refuse la requête
+   if (!req.body || Object.keys(req.body).length === 0) {
+    return res.status(400).json({ message: "Body vide: rien à modifier" });
+  }
+
   // On fusionne l'ancien objet avec les champs envoyés
   chambres[index] = { ...chambres[index], ...req.body, updatedAt: new Date() };
   return res.json(chambres[index]);
