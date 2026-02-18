@@ -1,5 +1,12 @@
+require("dotenv").config();
+
 const express = require("express");
+const connectDB = require("./config/db");
+
 const app = express();
+
+// Connexion Mongo (au démarrage du serveur)
+connectDB();
 
 app.use(express.json());
 
@@ -11,10 +18,8 @@ app.get("/health", (req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });
 });
 
-
 const chambreRoutes = require("./routes/chambre.routes");
 app.use("/api/chambres", chambreRoutes);
-
 
 // 404 - route non trouvée
 app.use((req, res) => {
@@ -29,8 +34,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server started on http://localhost:${PORT}`);
 });
