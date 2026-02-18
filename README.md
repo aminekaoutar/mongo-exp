@@ -51,6 +51,13 @@ docker exec -it mongo-hotel mongosh hotel_reservation
 - Identifiant administrateur : `admin`
 - Mot de passe : `pass`
 
+## Interface Web
+
+Accédez à l'interface web à l'adresse suivante :
+- URL : `http://localhost:8081`
+- Identifiant : `admin`
+- Mot de passe : `pass`
+
 ## Structure des collections
 
 ### utilisateurs
@@ -70,5 +77,3 @@ Informations de paiement : montant, méthode, statut, transaction.
 
 ### avis
 Avis et commentaires des clients sur leur séjour.
-
-
