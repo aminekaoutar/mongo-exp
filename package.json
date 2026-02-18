@@ -1,0 +1,28 @@
+{
+  "name": "mongo-exp",
+  "version": "1.0.0",
+  "description": "Ce projet est une application de **réservation d'hôtel** utilisant **Express** et **MongoDB**.  \r Le but est de gérer les chambres et les réservations, avec un panier pour ajouter/supprimer des réservations.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1" ,
+     "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aminekaoutar/mongo-exp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/aminekaoutar/mongo-exp/issues"
+  },
+  "homepage": "https://github.com/aminekaoutar/mongo-exp#readme",
+  "dependencies": {
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.11"
+  }
+}
