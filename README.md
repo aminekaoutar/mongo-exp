@@ -28,7 +28,7 @@ Docker
 # 1 Cloner le projet :
 
 ```bash
-git clone <URL_DU_REPO>
+git clone https://github.com/aminekaoutar/mongo-exp
 cd mongo-exp
 ```
 # 2 Installer les dépendances Node.js :
