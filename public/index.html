@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Test API Chambres</title>
+  <style>
+    body { font-family: Arial; margin: 20px; }
+    input, button { margin: 5px; }
+    .chambre { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }
+    .delete-btn { color: red; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <h1>Test API Chambres</h1>
+
+  <h2>Ajouter une chambre</h2>
+  <input type="text" id="numero" placeholder="Numéro">
+  <input type="text" id="type" placeholder="Type">
+  <input type="number" id="capacite" placeholder="Capacité">
+  <input type="number" id="prixParNuit" placeholder="Prix/Nuit">
+  <input type="text" id="equipements" placeholder="Équipements (virgule)">
+  <button onclick="ajouterChambre()">Ajouter</button>
+
+  <h2>Liste des chambres</h2>
+  <div id="listeChambres"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

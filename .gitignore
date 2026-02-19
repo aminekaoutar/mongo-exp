@@ -1,2 +1,21 @@
+# Node modules
 node_modules/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Env
 .env
+
+# VS Code
+.vscode/
+
+# Mac / Linux system files
+.DS_Store
+Thumbs.db
+
+# Front-end build / cache (si tu ajoutes un build)
+dist/
+build/
