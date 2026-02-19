@@ -18,46 +18,41 @@ Docker
 
 ## Prérequis
 
-- Docker Desktop installé et en cours d'exécution
-- Docker Compose
+- Node.js installé
+- MongoDB installé et en fonctionnement (local ou via Docker)
+- Navigateur pour tester le front
+- Terminal / PowerShell
 
 ## Installation
 
-1. Assurez-vous que Docker Desktop est en cours d'exécution sur votre machine
-2. Clonez ce dépôt
-3. Exécutez la commande suivante pour démarrer le conteneur MongoDB :
+1. Cloner le projet :
 
 ```bash
-docker-compose up -d
-```
-
-Cela va créer :
-- Un conteneur MongoDB nommé `mongo-hotel`
-- Une base de données `hotel_reservation`
-- Les collections avec des données d'exemple
-
-## Accéder à la base de données
-
-Pour accéder à MongoDB via le shell :
+git clone <URL_DU_REPO>
+cd mongo-exp
+# 2 Installer les dépendances Node.js :
 
 ```bash
-docker exec -it mongo-hotel mongosh hotel_reservation
+npm install
 ```
+#  3 Créer un fichier .env à la racine avec le contenu suivant :
+```bash
+MONGO_URI=mongodb://localhost:27017/hotel
+PORT=5000
+```
+# Lancer MongoDB 
+# Lancer le serveur Node.js :
+```bash
+node server.js
+Le serveur sera accessible sur : http://localhost:5000
+Vous pourrez :
 
-## Informations de connexion
+Ajouter une chambre
 
-- Adresse : `localhost:27017`
-- Nom de la base de données : `hotel_reservation`
-- Identifiant administrateur : `admin`
-- Mot de passe : `pass`
+Voir la liste des chambres
 
-## Interface Web
-
-Accédez à l'interface web à l'adresse suivante :
-- URL : `http://localhost:8081`
-- Identifiant : `admin`
-- Mot de passe : `pass`
-
+Supprimer une chambre
+```
 ## Structure des collections
 
 ### utilisateurs
