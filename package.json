@@ -1,0 +1,26 @@
+{
+  "name": "mongo-exp",
+  "version": "1.0.0",
+  "description": "Ce projet met en place une base de données MongoDB pour un système de réservation d'hôtel à l'aide de Docker.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aminekaoutar/mongo-exp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/aminekaoutar/mongo-exp/issues"
+  },
+  "homepage": "https://github.com/aminekaoutar/mongo-exp#readme",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "mongoose": "^9.2.1"
+  }
+}
