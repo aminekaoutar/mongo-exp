@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const reservationSchema = new mongoose.Schema(
   {
-    utilisateur_id: { type: mongoose.Schema.Types.ObjectId, ref: "Utilisateur", required: true },
+    utilisateur_id: { type: mongoose.Schema.Types.ObjectId, ref: "Utilisateur", required: false }, // Lien vers Utilisateur (optionnel)
+    utilisateur_nom: { type: String, required: false }, // Nom du client pour les réservations temporaires
     chambre_id: { type: mongoose.Schema.Types.ObjectId, ref: "Chambre", required: true },
     date_arrivee: { type: Date, required: true },
     date_depart: { type: Date, required: true },

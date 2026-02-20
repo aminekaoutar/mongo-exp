@@ -7,34 +7,49 @@ const Utilisateur = require("../models/Utilisateur");
 // CREATE : Ajouter une réservation
 router.post("/", async (req, res, next) => {
   try {
-    const { utilisateur_id, chambre_id, date_arrivee, date_depart, nombre_personnes } = req.body;
+    const { utilisateur_id, utilisateur_nom, chambre_id, date_arrivee, date_depart, nombre_personnes } = req.body;
 
-    if (!utilisateur_id || !chambre_id || !date_arrivee || !date_depart || !nombre_personnes) {
-      return res.status(400).json({ message: "Champs requis manquants" });
+    // Check if required fields are provided
+    if (!chambre_id || !date_arrivee || !date_depart || !nombre_personnes) {
+      return res.status(400).json({ message: "Champs requis manquants: chambre_id, date_arrivee, date_depart, nombre_personnes" });
     }
 
-    // Vérifier si l'utilisateur existe
-    const utilisateur = await Utilisateur.findById(utilisateur_id);
-    if (!utilisateur) return res.status(404).json({ message: "Utilisateur introuvable" });
-
-    // Vérifier si la chambre existe et est disponible
+    // Check if room exists and is available
     const chambre = await Chambre.findById(chambre_id);
     if (!chambre) return res.status(404).json({ message: "Chambre introuvable" });
     if (!chambre.disponible) return res.status(400).json({ message: "Chambre non disponible" });
 
-    // Créer la réservation
+    // Handle utilisateur - either use utilisateur_id if provided or create temporary reference
+    let utilisateurId = utilisateur_id;
+    let utilisateurRef = null;
+    
+    if (utilisateur_id) {
+      // If utilisateur_id is provided, verify it exists
+      const utilisateur = await Utilisateur.findById(utilisateur_id);
+      if (!utilisateur) return res.status(404).json({ message: "Utilisateur introuvable" });
+      utilisateurRef = utilisateur._id;
+    } else if (utilisateur_nom) {
+      // If utilisateur_nom is provided, we'll store it as a reference
+      // In a real application, you would create a user record
+      utilisateurRef = null; // Will be null for temporary reservations
+    } else {
+      return res.status(400).json({ message: "Utilisateur requis: fournissez utilisateur_id ou utilisateur_nom" });
+    }
+
+    // Create the reservation
     const reservation = await Reservation.create({
-      utilisateur_id,
+      utilisateur_id: utilisateurRef, // Could be null for temporary reservations
+      utilisateur_nom: utilisateur_nom, // Store the name for identification
       chambre_id,
       date_arrivee: new Date(date_arrivee),
       date_depart: new Date(date_depart),
       nombre_personnes,
       statut: "confirmée",
       date_reservation: new Date(),
-      prix_total: chambre.prixParNuit * nombre_personnes, // simple calcul
+      prix_total: chambre.prixParNuit * (nombre_personnes > 0 ? nombre_personnes : 1), // calculation based on persons
     });
 
-    // Optionnel : marquer la chambre comme non disponible
+    // Mark the room as unavailable
     chambre.disponible = false;
     await chambre.save();
 
@@ -89,7 +104,7 @@ router.delete("/:id", async (req, res, next) => {
     const reservation = await Reservation.findByIdAndDelete(req.params.id);
     if (!reservation) return res.status(404).json({ message: "Réservation introuvable" });
 
-    // Optionnel : remettre la chambre disponible
+    // Make the room available again
     const chambre = await Chambre.findById(reservation.chambre_id);
     if (chambre) {
       chambre.disponible = true;

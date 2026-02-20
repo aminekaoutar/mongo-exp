@@ -1,4 +1,5 @@
 const API_URL = '/api/chambres';
+const RESERVATION_API_URL = '/api/reservations';
 let allRooms = [];
 
 // Show alert messages
@@ -72,9 +73,109 @@ function displayRooms(rooms) {
       <div class="room-actions">
         <button class="action-btn edit-btn" onclick="editRoom('${room._id}')">Modifier</button>
         <button class="action-btn delete-btn" onclick="deleteRoom('${room._id}')">Supprimer</button>
+        ${room.disponible ? `<button class="action-btn edit-btn" onclick="reserveRoom('${room._id}', '${room.numero}', ${room.prixParNuit})">Réserver</button>` : ''}
       </div>
     </div>
   `).join('');
+}
+
+// Reserve a room
+async function reserveRoom(roomId, roomNumber, roomPrice) {
+  // Create a simple reservation form in a modal
+  const clientName = prompt(`Réserver la chambre ${roomNumber}\nPrix par nuit: ${roomPrice}€\n\nEntrez votre nom:`);
+  
+  if (!clientName) return; // User cancelled
+  
+  // Get check-in date (today by default)
+  const today = new Date();
+  const checkInDate = prompt(`Date d'arrivée (format: YYYY-MM-DD):\nExemple: ${today.toISOString().split('T')[0]}`, today.toISOString().split('T')[0]);
+  
+  if (!checkInDate) return; // User cancelled
+  
+  // Get check-out date
+  const checkOutDate = prompt(`Date de départ (format: YYYY-MM-DD):`, checkInDate);
+  
+  if (!checkOutDate) return; // User cancelled
+  
+  try {
+    // First, create a temporary user or get an existing one
+    // For now, we'll bypass the user validation and directly create the reservation
+    // using a simplified approach that doesn't require a real utilisateur
+    
+    // Create reservation data - we'll create a reservation without validating utilisateur for now
+    const reservationData = {
+      utilisateur_nom: clientName, // Store the name instead of ID
+      chambre_id: roomId,
+      date_arrivee: checkInDate,
+      date_depart: checkOutDate,
+      nombre_personnes: 1, // Default to 1 person
+      prix_total: calculateTotalPrice(roomPrice, checkInDate, checkOutDate)
+    };
+    
+    // Send reservation request to the API
+    const response = await fetch(RESERVATION_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(reservationData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erreur lors de la réservation de la chambre');
+    }
+
+    const reservationResult = await response.json();
+    
+    // Show success alert
+    alert(`✅ Réservation confirmée!
+Chambre: ${roomNumber}
+Client: ${clientName}
+Prix total: ${reservationResult.prix_total || reservationData.prix_total}€
+Arrivée: ${checkInDate}
+Départ: ${checkOutDate}`);
+    
+    // Update the room availability
+    updateRoomAvailability(roomId, false);
+    
+    // Refresh the room list
+    fetchRooms();
+    
+  } catch (error) {
+    console.error('Error reserving room:', error);
+    showAlert(error.message || 'Erreur lors de la réservation', 'error');
+  }
+}
+
+// Calculate total price based on nights
+function calculateTotalPrice(pricePerNight, checkInDate, checkOutDate) {
+  const checkIn = new Date(checkInDate);
+  const checkOut = new Date(checkOutDate);
+  const diffTime = Math.abs(checkOut - checkIn);
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  // Ensure at least 1 night
+  return diffDays > 0 ? pricePerNight * diffDays : pricePerNight;
+}
+
+// Update room availability after reservation
+async function updateRoomAvailability(roomId, disponible) {
+  try {
+    const response = await fetch(`${API_URL}/${roomId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ disponible })
+    });
+    
+    if (!response.ok) {
+      throw new Error('Erreur lors de la mise à jour de la disponibilité');
+    }
+  } catch (error) {
+    console.error('Error updating room availability:', error);
+  }
 }
 
 // Add a new room
