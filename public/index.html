@@ -2,27 +2,48 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Test API Chambres</title>
-  <style>
-    body { font-family: Arial; margin: 20px; }
-    input, button { margin: 5px; }
-    .chambre { border: 1px solid #ccc; padding: 10px; margin: 5px 0; }
-    .delete-btn { color: red; cursor: pointer; }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏨 Hotel Ipssi</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Test API Chambres</h1>
 
+  <header>
+    <h1>🏨 Hotel Ipssi</h1>
+    <p>Trouvez et réservez votre chambre idéale</p>
+  </header>
+
+  <!-- Recherche chambres -->
+  <section class="search-section">
+    <input type="number" id="searchCapacite" placeholder="Nombre de personnes">
+    <input type="number" id="searchPrix" placeholder="Prix max (€)">
+    <button onclick="rechercherChambres()">Rechercher</button>
+  </section>
+<section class="ajout-chambre">
   <h2>Ajouter une chambre</h2>
-  <input type="text" id="numero" placeholder="Numéro">
-  <input type="text" id="type" placeholder="Type">
+  <input type="text" id="numero" placeholder="Numéro de chambre">
+  <input type="text" id="type" placeholder="Type (simple, double, suite)">
   <input type="number" id="capacite" placeholder="Capacité">
-  <input type="number" id="prixParNuit" placeholder="Prix/Nuit">
+  <input type="number" id="prixParNuit" placeholder="Prix / nuit">
   <input type="text" id="equipements" placeholder="Équipements (virgule)">
   <button onclick="ajouterChambre()">Ajouter</button>
+</section>
 
-  <h2>Liste des chambres</h2>
-  <div id="listeChambres"></div>
+  <!-- Liste des chambres disponibles -->
+  <section>
+    <h2>Chambres disponibles</h2>
+    <div id="listeChambres" class="grid"></div>
+  </section>
+
+  <!-- Formulaire réservation -->
+  <section class="reservation-section">
+    <h2>Réserver une chambre</h2>
+    <input type="text" id="clientNom" placeholder="Votre nom">
+    <input type="date" id="dateDebut">
+    <input type="date" id="dateFin">
+    <input type="hidden" id="chambreSelectionnee">
+    <button onclick="confirmerReservation()">Confirmer la réservation</button>
+  </section>
 
   <script src="script.js"></script>
 </body>

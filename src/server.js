@@ -20,7 +20,10 @@ app.get("/health", (req, res) => {
 
 const chambreRoutes = require("./routes/chambre.routes");
 app.use("/api/chambres", chambreRoutes);
-
+const utilisateurRoutes = require("./routes/utilisateur.routes");
+app.use("/api/utilisateurs", utilisateurRoutes);
+const reservationRoutes = require("./routes/reservation.routes");
+app.use("/api/reservations", reservationRoutes);
 // 404 - route non trouvée
 app.use((req, res) => {
   res.status(404).json({ message: "Route introuvable" });

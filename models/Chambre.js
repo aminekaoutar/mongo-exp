@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const chambreSchema = new mongoose.Schema(
   {
+    hotel_id: { type: mongoose.Schema.Types.ObjectId, ref: "Hotel", required: true }, // Lien vers Hotel
     numero: { type: String, required: true },
     type: { type: String, required: true },
     capacite: { type: Number, required: true },
@@ -12,4 +13,5 @@ const chambreSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// On force la collection "chambres"
 module.exports = mongoose.model("Chambre", chambreSchema, "chambres");
