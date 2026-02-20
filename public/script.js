@@ -1,153 +1,255 @@
-const API_CHAMBRES = "/api/chambres";
-const API_UTILISATEURS = "/api/utilisateurs";
-const API_RESERVATIONS = "/api/reservations";
+const API_URL = '/api/chambres';
+let allRooms = [];
 
-let toutesLesChambres = [];
-
-// Charger toutes les chambres
-async function chargerChambres() {
-  try {
-    const res = await fetch(API_CHAMBRES);
-    toutesLesChambres = await res.json();
-    afficherChambres(toutesLesChambres);
-  } catch (err) {
-    console.error(err);
-    document.getElementById("listeChambres").innerHTML = "Erreur chargement chambres";
+// Show alert messages
+function showAlert(message, type = 'success') {
+  const alertContainer = document.getElementById('alertContainer');
+  alertContainer.innerHTML = `
+    <div class="alert alert-${type}">
+      ${message}
+    </div>
+  `;
+  
+  // Auto-hide success alerts after 3 seconds
+  if (type === 'success') {
+    setTimeout(() => {
+      alertContainer.innerHTML = '';
+    }, 3000);
   }
 }
 
-// Afficher les chambres disponibles
-function afficherChambres(chambres) {
-  const container = document.getElementById("listeChambres");
-  container.innerHTML = "";
-
-  chambres
-    .filter(ch => ch.disponible)
-    .forEach(ch => {
-      const div = document.createElement("div");
-      div.className = "card";
-      div.innerHTML = `
-        <h3>Chambre ${ch.numero}</h3>
-        <p>Type: ${ch.type}</p>
-        <p>Capacité: ${ch.capacite} personnes</p>
-        <p class="price">${ch.prixParNuit} € / nuit</p>
-        <button onclick="selectionnerChambre('${ch._id}')">Réserver</button>
-      `;
-      container.appendChild(div);
-    });
+// Fetch all rooms from the API
+async function fetchRooms() {
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    allRooms = await response.json();
+    displayRooms(allRooms);
+  } catch (error) {
+    console.error('Error fetching rooms:', error);
+    showAlert('Erreur lors du chargement des chambres', 'error');
+  }
 }
 
-// Rechercher chambres
-function rechercherChambres() {
-  const capacite = Number(document.getElementById("searchCapacite").value);
-  const prix = Number(document.getElementById("searchPrix").value);
-
-  let resultats = toutesLesChambres;
-
-  if (capacite) resultats = resultats.filter(ch => ch.capacite >= capacite);
-  if (prix) resultats = resultats.filter(ch => ch.prixParNuit <= prix);
-
-  afficherChambres(resultats);
-}
-
-// Sélection d’une chambre
-function selectionnerChambre(id) {
-  document.getElementById("chambreSelectionnee").value = id;
-  alert("Chambre sélectionnée ✅");
-}
-
-// Confirmer réservation
-async function confirmerReservation() {
-  const chambreId = document.getElementById("chambreSelectionnee").value;
-  const nomClient = document.getElementById("clientNom").value;
-  const dateDebut = document.getElementById("dateDebut").value;
-  const dateFin = document.getElementById("dateFin").value;
-
-  if (!chambreId || !nomClient || !dateDebut || !dateFin) {
-    alert("Veuillez remplir tous les champs et sélectionner une chambre !");
+// Display rooms in the grid
+function displayRooms(rooms) {
+  const container = document.getElementById('roomsContainer');
+  
+  if (rooms.length === 0) {
+    container.innerHTML = '<div class="no-rooms">Aucune chambre disponible actuellement</div>';
     return;
   }
-
-  try {
-    const chambre = toutesLesChambres.find(c => c._id === chambreId);
-    const nbNuits = (new Date(dateFin) - new Date(dateDebut)) / (1000 * 60 * 60 * 24);
-    const prixTotal = nbNuits * chambre.prixParNuit;
-
-    // Créer un utilisateur temporaire
-    const resUser = await fetch(API_UTILISATEURS, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        nom: nomClient,
-        prenom: "",
-        email: `${nomClient.replace(/\s+/g, "").toLowerCase()}@hotel.com`,
-        mot_de_passe: "temp"
-      })
-    });
-    const utilisateur = await resUser.json();
-
-    // Créer la réservation
-    await fetch(API_RESERVATIONS, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        utilisateur_id: utilisateur._id,
-        chambre_id: chambreId,
-        date_arrivee: dateDebut,
-        date_depart: dateFin,
-        nombre_personnes: chambre.capacite,
-        prix_total: prixTotal,
-        statut: "confirmée"
-      })
-    });
-
-    // Marquer la chambre comme indisponible
-    await fetch(`${API_CHAMBRES}/${chambreId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ disponible: false })
-    });
-
-    alert(`Réservation confirmée 🎉 pour ${nomClient}, total: ${prixTotal.toFixed(2)} €`);
-    chargerChambres();
-  } catch (err) {
-    console.error(err);
-    alert("Erreur lors de la réservation");
-  }
+  
+  container.innerHTML = rooms.map(room => `
+    <div class="room-card" data-room-id="${room._id}">
+      <h3> chambre ${room.numero}</h3>
+      <div class="room-details">
+        <div class="room-detail">
+          <span class="detail-label">Type:</span>
+          <span class="detail-value">${room.type}</span>
+        </div>
+        <div class="room-detail">
+          <span class="detail-label">Capacité:</span>
+          <span class="detail-value">${room.capacite} personne(s)</span>
+        </div>
+        <div class="room-detail">
+          <span class="detail-label">Prix/Nuit:</span>
+          <span class="detail-value">${room.prixParNuit}€</span>
+        </div>
+        <div class="room-detail">
+          <span class="detail-label">Équipements:</span>
+          <span class="detail-value">${room.equipements && room.equipements.length > 0 ? room.equipements.join(', ') : 'Aucun'}</span>
+        </div>
+        <div class="room-detail">
+          <span class="detail-label">Disponibilité:</span>
+          <span class="detail-value status-${room.disponible ? 'available' : 'booked'}">
+            ${room.disponible ? 'Disponible' : 'Occupée'}
+          </span>
+        </div>
+      </div>
+      <div class="room-actions">
+        <button class="action-btn edit-btn" onclick="editRoom('${room._id}')">Modifier</button>
+        <button class="action-btn delete-btn" onclick="deleteRoom('${room._id}')">Supprimer</button>
+      </div>
+    </div>
+  `).join('');
 }
-// Ajouter une chambre
-async function ajouterChambre() {
-  const numero = document.getElementById("numero").value;
-  const type = document.getElementById("type").value;
-  const capacite = Number(document.getElementById("capacite").value);
-  const prixParNuit = Number(document.getElementById("prixParNuit").value);
-  const equipements = document.getElementById("equipements").value
-                        .split(",").map(e => e.trim());
 
-  if (!numero || !type || !capacite || !prixParNuit) {
-    alert("Remplissez tous les champs obligatoires !");
-    return;
-  }
-
+// Add a new room
+async function addRoom(roomData) {
   try {
-    const res = await fetch("/api/chambres", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ numero, type, capacite, prixParNuit, equipements })
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(roomData)
     });
 
-    if (!res.ok) {
-      const err = await res.json();
-      alert("Erreur: " + err.message);
-      return;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erreur lors de l\'ajout de la chambre');
     }
 
-    alert("Chambre ajoutée ✅");
-    chargerChambres(); // recharge la liste
-  } catch (err) {
-    alert("Erreur fetch: " + err.message);
+    const newRoom = await response.json();
+    showAlert('Chambre ajoutée avec succès !');
+    document.getElementById('roomForm').reset();
+    fetchRooms(); // Refresh the list
+  } catch (error) {
+    console.error('Error adding room:', error);
+    showAlert(error.message || 'Erreur lors de l\'ajout de la chambre', 'error');
   }
 }
 
-// Charger les chambres au démarrage
-window.onload = chargerChambres;
+// Update a room
+async function updateRoom(id, roomData) {
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(roomData)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erreur lors de la mise à jour de la chambre');
+    }
+
+    const updatedRoom = await response.json();
+    showAlert('Chambre mise à jour avec succès !');
+    fetchRooms(); // Refresh the list
+  } catch (error) {
+    console.error('Error updating room:', error);
+    showAlert(error.message || 'Erreur lors de la mise à jour de la chambre', 'error');
+  }
+}
+
+// Delete a room
+async function deleteRoom(id) {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cette chambre ?')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_URL}/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Erreur lors de la suppression de la chambre');
+    }
+
+    const result = await response.json();
+    showAlert(result.message || 'Chambre supprimée avec succès !');
+    fetchRooms(); // Refresh the list
+  } catch (error) {
+    console.error('Error deleting room:', error);
+    showAlert(error.message || 'Erreur lors de la suppression de la chambre', 'error');
+  }
+}
+
+// Search rooms based on criteria
+function searchRooms(criteria) {
+  let filteredRooms = [...allRooms];
+
+  if (criteria.capacite) {
+    filteredRooms = filteredRooms.filter(room => room.capacite >= parseInt(criteria.capacite));
+  }
+
+  if (criteria.prixMax) {
+    filteredRooms = filteredRooms.filter(room => room.prixParNuit <= parseFloat(criteria.prixMax));
+  }
+
+  if (criteria.type) {
+    filteredRooms = filteredRooms.filter(room => room.type.toLowerCase().includes(criteria.type.toLowerCase()));
+  }
+
+  displayRooms(filteredRooms);
+}
+
+// Edit room function
+function editRoom(id) {
+  const room = allRooms.find(r => r._id === id);
+  if (!room) return;
+
+  // Fill the form with room data
+  document.getElementById('numero').value = room.numero;
+  document.getElementById('type').value = room.type;
+  document.getElementById('capacite').value = room.capacite;
+  document.getElementById('prixParNuit').value = room.prixParNuit;
+  document.getElementById('equipements').value = room.equipements ? room.equipements.join(', ') : '';
+  document.getElementById('disponible').value = room.disponible.toString();
+
+  // Change form submit behavior to update instead of add
+  const form = document.getElementById('roomForm');
+  form.onsubmit = async (e) => {
+    e.preventDefault();
+    
+    const formData = {
+      numero: document.getElementById('numero').value,
+      type: document.getElementById('type').value,
+      capacite: parseInt(document.getElementById('capacite').value),
+      prixParNuit: parseFloat(document.getElementById('prixParNuit').value),
+      equipements: document.getElementById('equipements').value.split(',').map(e => e.trim()).filter(e => e),
+      disponible: document.getElementById('disponible').value === 'true'
+    };
+
+    await updateRoom(id, formData);
+    
+    // Reset form to default behavior
+    form.onsubmit = handleRoomFormSubmit;
+    form.reset();
+  };
+}
+
+// Handle room form submission
+async function handleRoomFormSubmit(event) {
+  event.preventDefault();
+  
+  const formData = {
+    numero: document.getElementById('numero').value,
+    type: document.getElementById('type').value,
+    capacite: parseInt(document.getElementById('capacite').value),
+    prixParNuit: parseFloat(document.getElementById('prixParNuit').value),
+    equipements: document.getElementById('equipements').value.split(',').map(e => e.trim()).filter(e => e),
+    disponible: document.getElementById('disponible').value === 'true'
+  };
+
+  await addRoom(formData);
+}
+
+// Handle search form submission
+async function handleSearchFormSubmit(event) {
+  event.preventDefault();
+  
+  const criteria = {
+    capacite: document.getElementById('searchCapacite').value,
+    prixMax: document.getElementById('searchPrix').value,
+    type: document.getElementById('searchType').value
+  };
+
+  searchRooms(criteria);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Room form submission
+  const roomForm = document.getElementById('roomForm');
+  if (roomForm) {
+    roomForm.addEventListener('submit', handleRoomFormSubmit);
+  }
+
+  // Search form submission
+  const searchForm = document.getElementById('searchForm');
+  if (searchForm) {
+    searchForm.addEventListener('submit', handleSearchFormSubmit);
+  }
+
+  // Load rooms when page loads
+  fetchRooms();
+});

@@ -2,82 +2,107 @@ const express = require("express");
 const router = express.Router();
 const Chambre = require("../models/Chambre");
 
-// CREATE
-router.post("/", async (req, res, next) => {
+// CREATE - Add a new room
+router.post("/", async (req, res) => {
   try {
-    const { numero, type, capacite, prixParNuit, equipements, disponible } = req.body || {};
+    const { numero, type, capacite, prixParNuit, equipements, disponible } = req.body;
 
+    // Validate required fields
     if (!numero || !type || capacite == null || prixParNuit == null) {
       return res.status(400).json({
-        message: "Champs requis: numero, type, capacite, prixParNuit",
+        message: "Les champs requis sont: numero, type, capacite, prixParNuit"
       });
     }
 
-    const nouvelleChambre = await Chambre.create({
+    // Create new room
+    const nouvelleChambre = new Chambre({
       numero,
       type,
       capacite,
       prixParNuit,
-      equipements: Array.isArray(equipements) ? equipements : [],
-      disponible: disponible ?? true,
+      equipements: Array.isArray(equipements) ? equipements : (typeof equipements === 'string' ? equipements.split(',') : []),
+      disponible: disponible !== undefined ? disponible : true
     });
 
-    return res.status(201).json(nouvelleChambre);
-  } catch (err) {
-    return next(err);
+    const savedRoom = await nouvelleChambre.save();
+    res.status(201).json(savedRoom);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Le numéro de chambre existe déjà" });
+    }
+    res.status(400).json({ message: error.message });
   }
 });
 
-// READ ALL
-router.get("/", async (req, res, next) => {
+// READ ALL - Get all rooms
+router.get("/", async (req, res) => {
   try {
     const chambres = await Chambre.find().sort({ createdAt: -1 });
-    return res.json(chambres);
-  } catch (err) {
-    return next(err);
+    res.json(chambres);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
-// READ ONE
-router.get("/:id", async (req, res, next) => {
+// READ ONE - Get a specific room
+router.get("/:id", async (req, res) => {
   try {
     const chambre = await Chambre.findById(req.params.id);
-    if (!chambre) return res.status(404).json({ message: "Chambre introuvable" });
-    return res.json(chambre);
-  } catch (err) {
-    return next(err);
+    if (!chambre) {
+      return res.status(404).json({ message: "Chambre introuvable" });
+    }
+    res.json(chambre);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 
-// UPDATE
-router.put("/:id", async (req, res, next) => {
+// UPDATE - Update a room
+router.put("/:id", async (req, res) => {
   try {
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({ message: "Body vide: rien à modifier" });
-    }
+    const { numero, type, capacite, prixParNuit, equipements, disponible } = req.body;
 
-    const chambre = await Chambre.findByIdAndUpdate(
+    const updatedRoom = await Chambre.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      { 
+        numero, 
+        type, 
+        capacite, 
+        prixParNuit, 
+        equipements: Array.isArray(equipements) ? equipements : (typeof equipements === 'string' ? equipements.split(',') : []),
+        disponible 
+      },
       { new: true, runValidators: true }
     );
 
-    if (!chambre) return res.status(404).json({ message: "Chambre introuvable" });
-    return res.json(chambre);
-  } catch (err) {
-    return next(err);
+    if (!updatedRoom) {
+      return res.status(404).json({ message: "Chambre introuvable" });
+    }
+
+    res.json(updatedRoom);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: "Le numéro de chambre existe déjà" });
+    }
+    res.status(400).json({ message: error.message });
   }
 });
 
-// DELETE
-router.delete("/:id", async (req, res, next) => {
+// DELETE - Remove a room
+router.delete("/:id", async (req, res) => {
   try {
-    const chambre = await Chambre.findByIdAndDelete(req.params.id);
-    if (!chambre) return res.status(404).json({ message: "Chambre introuvable" });
+    const deletedRoom = await Chambre.findByIdAndDelete(req.params.id);
 
-    return res.json({ message: "Supprimée ✅", deleted: chambre });
-  } catch (err) {
-    return next(err);
+    if (!deletedRoom) {
+      return res.status(404).json({ message: "Chambre introuvable" });
+    }
+
+    res.json({ 
+      message: "Chambre supprimée avec succès", 
+      deletedRoom 
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

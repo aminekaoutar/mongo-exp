@@ -1,36 +1,37 @@
-const express = require("express");
 require("dotenv").config();
+const express = require("express");
 const connectDB = require("./config/db");
 const path = require("path");
 
 const app = express();
 
-// Connexion MongoDB
+// Connect to MongoDB
 connectDB();
 
-// JSON middleware
+// Middleware
 app.use(express.json());
-
-// Servir les fichiers statiques du front
 app.use(express.static(path.join(__dirname, "public")));
 
-// Routes API
+// API Routes
 const chambreRoutes = require("./routes/chambre.routes");
+const reservationRoutes = require("./routes/reservation.routes");
 app.use("/api/chambres", chambreRoutes);
+app.use("/api/reservations", reservationRoutes);
 
-// Route test /health
+// Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });
 });
 
-// 404 pour tout le reste
-app.use((req, res) => res.status(404).json({ message: "Route introuvable" }));
-
-// Middleware erreur
+// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(err.status || 500).json({ message: err.message || "Erreur serveur" });
+  console.error(err.stack);
+  res.status(500).json({ 
+    message: err.message || "Une erreur serveur s'est produite" 
+  });
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Serveur lancé sur http://localhost:${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Serveur démarré sur http://localhost:${PORT}`);
+});

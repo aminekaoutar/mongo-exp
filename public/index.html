@@ -3,48 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🏨 Hotel Ipssi</title>
+  <title>🏨 Réservation d'Hôtel</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <header>
-    <h1>🏨 Hotel Ipssi</h1>
-    <p>Trouvez et réservez votre chambre idéale</p>
-  </header>
-
-  <!-- Recherche chambres -->
-  <section class="search-section">
-    <input type="number" id="searchCapacite" placeholder="Nombre de personnes">
-    <input type="number" id="searchPrix" placeholder="Prix max (€)">
-    <button onclick="rechercherChambres()">Rechercher</button>
-  </section>
-<section class="ajout-chambre">
-  <h2>Ajouter une chambre</h2>
-  <input type="text" id="numero" placeholder="Numéro de chambre">
-  <input type="text" id="type" placeholder="Type (simple, double, suite)">
-  <input type="number" id="capacite" placeholder="Capacité">
-  <input type="number" id="prixParNuit" placeholder="Prix / nuit">
-  <input type="text" id="equipements" placeholder="Équipements (virgule)">
-  <button onclick="ajouterChambre()">Ajouter</button>
-</section>
-
-  <!-- Liste des chambres disponibles -->
-  <section>
-    <h2>Chambres disponibles</h2>
-    <div id="listeChambres" class="grid"></div>
-  </section>
-
-  <!-- Formulaire réservation -->
-  <section class="reservation-section">
-    <h2>Réserver une chambre</h2>
-    <input type="text" id="clientNom" placeholder="Votre nom">
-    <input type="date" id="dateDebut">
-    <input type="date" id="dateFin">
-    <input type="hidden" id="chambreSelectionnee">
-    <button onclick="confirmerReservation()">Confirmer la réservation</button>
-  </section>
-
+  <div class="container">
+    <header class="header">
+      <h1>🏨 Système de Réservation d'Hôtel</h1>
+      <p>Gestion complète des chambres et réservations</p>
+    </header>
+    
+    <main class="content">
+      <!-- Section de recherche -->
+      <section class="search-section">
+        <h2>🔍 Rechercher des Chambres</h2>
+        <form class="search-form" id="searchForm">
+          <div class="form-group">
+            <label for="searchCapacite">Capacité minimale :</label>
+            <input type="number" id="searchCapacite" placeholder="Ex: 2 personnes">
+          </div>
+          
+          <div class="form-group">
+            <label for="searchPrix">Prix maximum (€) :</label>
+            <input type="number" id="searchPrix" placeholder="Ex: 150€">
+          </div>
+          
+          <div class="form-group">
+            <label for="searchType">Type de chambre :</label>
+            <select id="searchType">
+              <option value="">Tous les types</option>
+              <option value="simple">Simple</option>
+              <option value="double">Double</option>
+              <option value="suite">Suite</option>
+              <option value="family">Familiale</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Rechercher</button>
+        </form>
+      </section>
+      
+      <!-- Section d'ajout de chambre -->
+      <section class="add-room-section">
+        <h2>➕ Ajouter une Nouvelle Chambre</h2>
+        <form class="room-form" id="roomForm">
+          <div class="form-group">
+            <label for="numero">Numéro de chambre :</label>
+            <input type="text" id="numero" placeholder="Ex: 101" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="type">Type de chambre :</label>
+            <select id="type" required>
+              <option value="">Sélectionnez un type</option>
+              <option value="simple">Simple</option>
+              <option value="double">Double</option>
+              <option value="suite">Suite</option>
+              <option value="family">Familiale</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="capacite">Capacité (personnes) :</label>
+            <input type="number" id="capacite" placeholder="Ex: 2" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="prixParNuit">Prix par nuit (€) :</label>
+            <input type="number" step="0.01" id="prixParNuit" placeholder="Ex: 85.50" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="equipements">Équipements (séparés par virgules) :</label>
+            <input type="text" id="equipements" placeholder="Ex: wifi, tv, climatisation">
+          </div>
+          
+          <div class="form-group">
+            <label for="disponible">Disponibilité :</label>
+            <select id="disponible" required>
+              <option value="true">Disponible</option>
+              <option value="false">Occupée</option>
+            </select>
+          </div>
+          
+          <button type="submit" class="btn btn-primary">Ajouter la Chambre</button>
+        </form>
+      </section>
+      
+      <!-- Section d'affichage des chambres -->
+      <section class="rooms-section">
+        <h2>📋 Liste des Chambres</h2>
+        <div id="alertContainer"></div>
+        <div id="roomsContainer" class="room-grid">
+          <!-- Les chambres seront affichées ici dynamiquement -->
+        </div>
+      </section>
+    </main>
+  </div>
+  
   <script src="script.js"></script>
 </body>
 </html>

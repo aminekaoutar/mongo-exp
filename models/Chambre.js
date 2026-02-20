@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const chambreSchema = new mongoose.Schema(
   {
-    hotel_id: { type: mongoose.Schema.Types.ObjectId, ref: "Hotel", required: true }, // Lien vers Hotel
+    hotel_id: { type: mongoose.Schema.Types.ObjectId, ref: "Hotel", required: false }, // Lien vers Hotel (optionnel)
     numero: { type: String, required: true },
     type: { type: String, required: true },
     capacite: { type: Number, required: true },
